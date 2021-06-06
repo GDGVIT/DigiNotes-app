@@ -187,7 +187,7 @@ class _EditNotePageState extends State<EditNotePage> {
               Expanded(
                 child: Container(
                   width: scrwid,
-                  margin: EdgeInsets.only(left: 10, right: 10),
+                  margin: EdgeInsets.only(left: 8, right: 8, bottom: 4),
                   padding: EdgeInsets.fromLTRB(25, 30, 25, 40),
                   decoration: BoxDecoration(
                     color: blue.withOpacity(0.95),
@@ -228,10 +228,6 @@ class _EditNotePageState extends State<EditNotePage> {
 
   Future getImage(context, i) async {
     File image;
-    setState(() {
-      titleController.text = currentNote.title;
-      contentController.text = currentNote.content;
-    });
     final picker = ImagePicker();
     var _pickedFile = await picker.getImage(
         source: (i == 0 ? ImageSource.gallery : ImageSource.camera));
@@ -244,6 +240,7 @@ class _EditNotePageState extends State<EditNotePage> {
       );
       var resp1 = await _upload(_image);
       if (resp1 != null) {
+        print('${resp1.data}');
         var convertedResp = Posts.fromJson(resp1.data);
         String str='';
         convertedResp.sentences.forEach((element) 

@@ -91,7 +91,7 @@ class _ViewNotePageState extends State<ViewNotePage> {
               Expanded(
                 child: Container(
                   width: scrwid,
-                  margin: EdgeInsets.only(left: 10, right: 10),
+                  margin: EdgeInsets.only(left: 8, right: 8, bottom: 4),
                   padding: EdgeInsets.fromLTRB(25, 30, 25, 40),
                   decoration: BoxDecoration(
                     color: blue.withOpacity(0.95),
