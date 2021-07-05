@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'dart:io';
 import 'dart:async';
@@ -6,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:diginotes_app/src/repos/notes_model.dart';
+import 'package:diginotes_app/src/pres/screens/camera.dart';
 import 'package:diginotes_app/src/services/database.dart';
 import 'package:diginotes_app/src/utils/details.dart';
 import 'package:diginotes_app/src/pres/screens/view_note.dart';
@@ -13,6 +15,7 @@ import 'package:diginotes_app/src/pres/widgets/faderoute.dart';
 import 'package:diginotes_app/src/repos/jsontodart.dart';
 import 'package:diginotes_app/src/pres/widgets/expandableFAB.dart';
 import 'package:diginotes_app/src/pres/widgets/loading_indicator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class EditNotePage extends StatefulWidget {
   Function() triggerRefetch;
@@ -36,6 +39,7 @@ class _EditNotePageState extends State<EditNotePage> {
   NotesModel currentNote;
   TextEditingController titleController = TextEditingController();
   TextEditingController contentController = TextEditingController();
+  var imagePath;
 
   @override
   void initState() {
@@ -102,7 +106,7 @@ class _EditNotePageState extends State<EditNotePage> {
                 icon: const Icon(Icons.insert_photo),
               ),
               ActionButton(
-                onPressed: () => getImage(context, 1),
+                onPressed: () => getCamImage(context),
                 icon: const Icon(Icons.add_a_photo),
               ),
             ],
@@ -159,7 +163,7 @@ class _EditNotePageState extends State<EditNotePage> {
                   onSubmitted: (text) {
                     titleFocus.unfocus();
                     FocusScope.of(context).requestFocus(contentFocus);
-                    titleController.text=currentNote.title;
+                    titleController.text = currentNote.title;
                   },
                   onChanged: (value) {
                     markTitleAsDirty(value);
@@ -224,6 +228,45 @@ class _EditNotePageState extends State<EditNotePage> {
         ),
       ),
     );
+  }
+
+  Future getCamImage(context) async {
+    if (await Permission.camera.request().isGranted) {
+      imagePath = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TakePictureScreen(),
+        ),
+      );
+      if (imagePath != null) {
+        setState(
+          () {
+            _image = File(imagePath);
+          },
+        );
+        var resp1 = await _upload(_image);
+        if (resp1 != null) {
+          print('${resp1.data}');
+          dynamic convertedResp = Posts.fromJson(resp1.data);
+          String str = '';
+          convertedResp.sentences.forEach(
+            (element) {
+              str += element;
+              str += '\n';
+            },
+          );
+          setState(
+            () {
+              if (currentNote != null) {
+                contentController.text += str;
+                isDirty = true;
+              }
+              print(contentController.text);
+            },
+          );
+        }
+      }
+    }
   }
 
   Future getImage(context, i) async {
